@@ -7,14 +7,19 @@ import lombok.NonNull;
 import org.dotwebstack.framework.frontend.http.layout.Layout;
 import org.dotwebstack.framework.frontend.http.stage.Stage;
 import org.dotwebstack.ldtlegacy.vocabulary.XHTML;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.web.csrf.CsrfToken;
 
 public class Context {
+
+  private static final Logger LOG = LoggerFactory.getLogger(CreatePage.class);
 
   private static final String CONTEXT_TEMPLATE =
       "<context docroot='%s' staticroot='%s/assets' linkstrategy='%s'>"
           + "<title>%s</title><request-path>%s</request-path><url>%s</url>"
           + "<csrf>%s</csrf><subject>%s</subject>%s<subdomain>%s</subdomain>"
+          + "<parameters>%s</parameters>"
           + "</context>";
 
   private final String contextXml;
@@ -60,8 +65,15 @@ public class Context {
     CsrfToken token = (CsrfToken) containerRequestContext.getProperty(CsrfToken.class.getName());
     String csrf = (token == null ? "" : token.getToken());
 
+    String parameters = "";
+    for (Map.Entry<String, String> entry : parameterValues.entrySet()) {
+      parameters += String.format("<parameter><name>%s</name><value>%s</value></parameter>",
+          entry.getKey(), entry.getValue());
+    }
     contextXml = String.format(CONTEXT_TEMPLATE, docRoot, docRoot, linkstrategy, title, path,
-        fullUrl, csrf, subject, stylesheet, subdomain);
+        fullUrl, csrf, subject, stylesheet, subdomain, parameters);
+        
+    LOG.debug(contextXml);
   }
 
   public String getContextXml() {
