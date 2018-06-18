@@ -25,7 +25,7 @@ GRAPH config:Theatre {
     elmo:layout config:StageLayout;
     dc:title "Demo for LDT 2.0 alfa";
   .
-  
+
   config:StageLayout a elmo:Layout;
     xhtml:stylesheet "stage-layout.css";
   .
@@ -33,7 +33,7 @@ GRAPH config:Theatre {
   config:DBPediaBackend a elmo:SparqlBackend;
     elmo:endpoint "http://dbpedia.org/sparql"^^xsd:anyURI;
   .
-  
+
   config:LOVBackend a elmo:SparqlBackend;
     elmo:endpoint "http://lov.okfn.org/dataset/lov/sparql"^^xsd:anyURI;
   .
@@ -173,6 +173,7 @@ GRAPH config:Theatre {
             <p>You can check this demo configuration via the following links:</p>
             <ul>
               <li><a href="/demo/amersfoort">Amersfoort triples from dbpedia</a></li>
+              <li><a href="/demo/cities">Dutch cities from dbpedia</a></li>
               <li><a href="/dbp/ld/v1/graph-breweries">Breweries triples from local triplestore</a></li>
               <li><a href="/dbp/ld/v1/tuple-breweries">Breweries tuples from local triplestore</a></li>
             </ul>
@@ -221,6 +222,40 @@ GRAPH config:Theatre {
       }
     """;
   .
+
+  # ==========================
+  #
+  # Dutch cities
+  #
+  # ==========================
+
+  config:CitiesEndpoint a elmo:Endpoint;
+      elmo:pathPattern "/demo/cities";
+      elmo:stage config:Stage;
+      elmo:getRepresentation config:Cities;
+    .
+
+    config:Cities a elmo:Representation;
+      elmo:stage config:Stage;
+      elmo:contains config:Menu;
+      elmo:appearance config:CitiesAppearance;
+      elmo:informationProduct config:CitiesData
+    .
+    config:CitiesAppearance a elmo:TableAppearance;
+    .
+    config:CitiesData a elmo:InformationProduct;
+      elmo:backend config:DBPediaBackend;
+      elmo:resultType elmo-rt:Tuple;
+      elmo:query """
+        PREFIX dbo: <http://dbpedia.org/ontology/>
+        SELECT ?city ?cityname
+        WHERE {
+          ?city dbo:type <http://dbpedia.org/resource/Cities_of_the_Netherlands>.
+          ?city rdfs:label ?cityname.
+          FILTER (lang(?cityname)="en")
+        }
+      """;
+    .
 
 # ==========================
 #
@@ -392,7 +427,7 @@ config:AmersfoortEndpoint a elmo:Endpoint;
       }
     """
   .
-  
+
   #
   # Places tree
   #
@@ -424,7 +459,7 @@ config:AmersfoortEndpoint a elmo:Endpoint;
       }
     """;
   .
-  
+
 # ==========================
 #
 # Editor
@@ -509,13 +544,13 @@ config:AmersfoortEndpoint a elmo:Endpoint;
       }
     """
   .
-  
+
   config:EditorTransactionEndpoint a elmo:Endpoint;
     elmo:pathPattern "/demo/editor/save";
     elmo:stage config:Stage;
     elmo:putService config:EditorTransactionService
   .
-  
+
   config:EditorTransactionService a elmo:Service;
     elmo:transaction config:EditorTransaction
   .
@@ -542,7 +577,7 @@ config:AmersfoortEndpoint a elmo:Endpoint;
 #    elmo:appearance [ a elmo:TurtleAppearance];
     elmo:informationProduct config:EditorData;
   .
-  
+
 # ==========================
 #
 # Editor (with delta update)
@@ -618,7 +653,7 @@ config:AmersfoortEndpoint a elmo:Endpoint;
       rdfs:label "Save (delta)"@en;
     ];
   .
-  
+
   config:Editor2TransactionEndpoint a elmo:Endpoint;
     elmo:pathPattern "/demo/editor2/save";
     elmo:stage config:Stage;
@@ -626,7 +661,7 @@ config:AmersfoortEndpoint a elmo:Endpoint;
     elmo:putService config:EditorChangeTransactionService;
     elmo:deleteService config:EditorDeleteTransactionService
   .
-  
+
   config:EditorInsertTransactionService a elmo:Service;
     elmo:transaction config:EditorInsertTransaction
   .
