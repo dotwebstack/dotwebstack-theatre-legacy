@@ -164,7 +164,8 @@ GRAPH config:Theatre {
     elmo:query """
       prefix elmo1: <http://bp4mc2.org/elmo/def#>
       CONSTRUCT {
-        [] rdfs:label "Linked Data Theatre 2.0";
+        [] rdfs:label "Linked Data Theatre 2.0"@en;
+          rdfs:label "Linked Data Theater 2.0"@nl;
           elmo1:html '''
             <h1>It works!</h1>
             <p>Welcome at the Linked Data Theatre 2.0 demo site</p>
