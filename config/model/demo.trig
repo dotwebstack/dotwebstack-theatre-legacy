@@ -25,7 +25,7 @@ GRAPH config:Theatre {
     elmo:layout config:StageLayout;
     dc:title "Demo for LDT 2.0 alfa";
   .
-  
+
   config:StageLayout a elmo:Layout;
     xhtml:stylesheet "stage-layout.css";
   .
@@ -33,7 +33,7 @@ GRAPH config:Theatre {
   config:DBPediaBackend a elmo:SparqlBackend;
     elmo:endpoint "http://dbpedia.org/sparql"^^xsd:anyURI;
   .
-  
+
   config:LOVBackend a elmo:SparqlBackend;
     elmo:endpoint "http://lov.okfn.org/dataset/lov/sparql"^^xsd:anyURI;
   .
@@ -164,7 +164,8 @@ GRAPH config:Theatre {
     elmo:query """
       prefix elmo1: <http://bp4mc2.org/elmo/def#>
       CONSTRUCT {
-        [] rdfs:label "Linked Data Theatre 2.0";
+        [] rdfs:label "Linked Data Theatre 2.0"@en;
+          rdfs:label "Linked Data Theater 2.0"@nl;
           elmo1:html '''
             <h1>It works!</h1>
             <p>Welcome at the Linked Data Theatre 2.0 demo site</p>
@@ -392,7 +393,7 @@ config:AmersfoortEndpoint a elmo:Endpoint;
       }
     """
   .
-  
+
   #
   # Places tree
   #
@@ -424,7 +425,7 @@ config:AmersfoortEndpoint a elmo:Endpoint;
       }
     """;
   .
-  
+
 # ==========================
 #
 # Editor
@@ -509,13 +510,13 @@ config:AmersfoortEndpoint a elmo:Endpoint;
       }
     """
   .
-  
+
   config:EditorTransactionEndpoint a elmo:Endpoint;
     elmo:pathPattern "/demo/editor/save";
     elmo:stage config:Stage;
     elmo:putService config:EditorTransactionService
   .
-  
+
   config:EditorTransactionService a elmo:Service;
     elmo:transaction config:EditorTransaction
   .
@@ -542,7 +543,7 @@ config:AmersfoortEndpoint a elmo:Endpoint;
 #    elmo:appearance [ a elmo:TurtleAppearance];
     elmo:informationProduct config:EditorData;
   .
-  
+
 # ==========================
 #
 # Editor (with delta update)
@@ -618,7 +619,7 @@ config:AmersfoortEndpoint a elmo:Endpoint;
       rdfs:label "Save (delta)"@en;
     ];
   .
-  
+
   config:Editor2TransactionEndpoint a elmo:Endpoint;
     elmo:pathPattern "/demo/editor2/save";
     elmo:stage config:Stage;
@@ -626,7 +627,7 @@ config:AmersfoortEndpoint a elmo:Endpoint;
     elmo:putService config:EditorChangeTransactionService;
     elmo:deleteService config:EditorDeleteTransactionService
   .
-  
+
   config:EditorInsertTransactionService a elmo:Service;
     elmo:transaction config:EditorInsertTransaction
   .
