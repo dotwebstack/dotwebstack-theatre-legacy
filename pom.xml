@@ -79,6 +79,16 @@
       <artifactId>dotwebstack-frontend-openapi</artifactId>
       <version>${dotwebstack.framework.version}</version>
     </dependency>
+	<!-- Security dependency. Remove this to enable security -->
+	<!-- Look at application.yml for an example configuration -->
+	<!--
+    <dependency>
+      <groupId>org.dotwebstack.theatre</groupId>
+      <artifactId>dotwebstack-theatre-security</artifactId>
+      <version>0.0.3</version>
+    </dependency>
+	-->
+	<!-- END Security dependency -->
     <dependency>
       <groupId>org.dotwebstack.framework</groupId>
       <artifactId>dotwebstack-frontend-soap</artifactId>

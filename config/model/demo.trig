@@ -132,9 +132,11 @@ GRAPH config:Theatre {
   config:FormatIndexData a elmo:InformationProduct;
     elmo:backend config:DBPediaBackend;
     elmo:query """
+      prefix elmo1: <http://bp4mc2.org/elmo/def#>
       CONSTRUCT {
         [] rdfs:label "a|b|c";
-           rdf:value "x|y|z"
+           rdf:value "x|y|z";
+           elmo1:name "test"
       }
       WHERE {}
     """;
@@ -771,4 +773,30 @@ config:AmersfoortEndpoint a elmo:Endpoint;
     )
   .
 
+# ==========================
+#
+# Login page
+#
+# ==========================
+
+  config:LoginEndpoint a elmo:Endpoint;
+    elmo:pathPattern "/aquo/login";
+    elmo:stage config:Stage;
+    elmo:getRepresentation config:Login;
+  .
+
+  config:Login a elmo:Representation;
+    elmo:stage config:Stage;
+    elmo:appearance [ a elmo:LoginAppearance];
+    elmo:informationProduct config:LoginData;
+  .
+  
+  config:LoginData a elmo:InformationProduct;
+    elmo:backend config:LocalBackend;
+    elmo:resultType elmo-rt:Tuple;
+    elmo:query """
+      SELECT *
+      WHERE {}
+    """
+  .
 }

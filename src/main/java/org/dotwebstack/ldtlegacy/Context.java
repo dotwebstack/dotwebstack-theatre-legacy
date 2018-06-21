@@ -9,14 +9,18 @@ import lombok.NonNull;
 import org.dotwebstack.framework.frontend.http.layout.Layout;
 import org.dotwebstack.framework.frontend.http.stage.Stage;
 import org.dotwebstack.ldtlegacy.vocabulary.XHTML;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Context {
+
+  private static final Logger LOG = LoggerFactory.getLogger(CreatePage.class);
 
   private static final String CONTEXT_TEMPLATE =
       "<context docroot='%s' staticroot='%s/assets' linkstrategy='%s'>"
           + "<title>%s</title><request-path>%s</request-path><url>%s</url>"
           + "<subject>%s</subject>%s<subdomain>%s</subdomain>"
-          + "<language>%s</language>"
+          + "<language>%s</language><parameters>%s</parameters>"
           + "</context>";
 
   private final String contextXml;
@@ -77,8 +81,14 @@ public class Context {
     if (parameterValues.containsKey("subject")) {
       subject = parameterValues.get("subject");
     }
+
+    String parameters = "";
+    for (Map.Entry<String, String> entry : parameterValues.entrySet()) {
+      parameters += String.format("<parameter><name>%s</name><value>%s</value></parameter>",
+          entry.getKey(), entry.getValue());
+    }
     contextXml = String.format(CONTEXT_TEMPLATE, docRoot, docRoot, linkstrategy, title, path,
-        fullUrl, subject, stylesheet, subdomain, language);
+        fullUrl, subject, stylesheet, subdomain, language, parameters);
   }
 
   public String getContextXml() {
