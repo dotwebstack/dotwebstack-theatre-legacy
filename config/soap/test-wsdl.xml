@@ -42,7 +42,7 @@
 			<xs:complexType name="VehicleNames">
 				<xs:sequence>
 					<xs:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="xs:string">
-						<xs:annotation dws:path="blaat"/>
+						<xs:annotation dws:valueFrom="name"/>
 					</xs:element>
 				</xs:sequence>
 			</xs:complexType>
