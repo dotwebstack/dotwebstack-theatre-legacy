@@ -790,7 +790,7 @@ config:AmersfoortEndpoint a elmo:Endpoint;
     elmo:appearance [ a elmo:LoginAppearance];
     elmo:informationProduct config:LoginData;
   .
-  
+
   config:LoginData a elmo:InformationProduct;
     elmo:backend config:LocalBackend;
     elmo:resultType elmo-rt:Tuple;
@@ -799,4 +799,28 @@ config:AmersfoortEndpoint a elmo:Endpoint;
       WHERE {}
     """
   .
+
+  # ==========================
+  #
+  # Vehicle names IP for API and SOAP
+  #
+  # ==========================
+
+  config:GetVehicleNames a elmo:InformationProduct;
+    elmo:backend config:DBPediaBackend;
+    elmo:resultType elmo-rt:Tuple;
+    elmo:query """
+      prefix dbo: <http://dbpedia.org/ontology/>
+      prefix dbr: <http://dbpedia.org/resource/>
+      prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+      select ?name
+      where {
+        ?s rdfs:label ?name.
+        ?s dbo:product dbr:Car
+        filter (lang(?name)="en")
+      }
+      limit 100
+    """
+  .
+
 }

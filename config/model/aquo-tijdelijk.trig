@@ -1,0 +1,44 @@
+@prefix elmo: <http://dotwebstack.org/def/elmo#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix config: <http://dotwebstack.org/configuration/>.
+@prefix xhtml: <http://www.w3.org/1999/xhtml/vocab#>.
+@prefix elmo-rt: <http://dotwebstack.org/def/elmo/result-type/>.
+
+GRAPH config:Theatre {
+
+#
+# Informatieproducten
+#
+config:GetDomainTableNames a elmo:InformationProduct;
+  elmo:backend config:DBPediaBackend;
+  elmo:resultType elmo-rt:Tuple;
+  elmo:query """
+    prefix dbo: <http://dbpedia.org/ontology/>
+    prefix dbr: <http://dbpedia.org/resource/>
+    prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    select ?domaintablename
+    where {
+      ?s rdfs:label ?domaintablename.
+      ?s dbo:product dbr:Car
+      filter (lang(?domaintablename)="en")
+    }
+    limit 100
+  """
+.
+
+#
+# Ten behoeve van test
+#
+config:GetDomainTableNamesEndpoint a elmo:Endpoint;
+  elmo:pathPattern "/aquo/GetDomainTableNames";
+  elmo:stage config:Stage;
+  elmo:getRepresentation config:getDomainTableNamesRepresentation;
+.
+
+config:getDomainTableNamesRepresentation a elmo:Representation;
+  elmo:stage config:Stage;
+  elmo:informationProduct config:GetDomainTableNames;
+.
+
+}
