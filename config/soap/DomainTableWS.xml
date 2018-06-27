@@ -128,7 +128,9 @@
           <xs:extension base="tns:PagingResultSet">
             <xs:sequence>
               <xs:element name="Data" nillable="true" type="tns:Data"/>
-              <xs:element name="Name" nillable="true" type="xs:string"/>
+              <xs:element name="Name" nillable="true" type="xs:string">
+                <xs:annotation dws:valueFrom="domaintablename"/>
+              </xs:element>
             </xs:sequence>
           </xs:extension>
         </xs:complexContent>
@@ -150,7 +152,9 @@
       <xs:element name="Data" nillable="true" type="tns:Data"/>
       <xs:complexType name="DataRow">
         <xs:sequence>
-          <xs:element name="BeginDate" type="xs:dateTime"/>
+          <xs:element name="BeginDate" type="xs:dateTime">
+            <xs:annotation dws:valueFrom="id"/>
+          </xs:element>
           <xs:element name="EndDate" type="xs:dateTime"/>
           <xs:element name="Fields" nillable="true" type="tns:Fields"/>
         </xs:sequence>
@@ -165,7 +169,9 @@
       <xs:complexType name="DataField">
         <xs:sequence>
           <xs:element name="IsNull" type="xs:boolean"/>
-          <xs:element name="Name" nillable="true" type="xs:string"/>
+          <xs:element name="Name" nillable="true" type="xs:string">
+            <xs:annotation dws:valueFrom="property"/>
+          </xs:element>
         </xs:sequence>
       </xs:complexType>
       <xs:element name="DataField" nillable="true" type="tns:DataField"/>
@@ -173,7 +179,9 @@
         <xs:complexContent mixed="false">
           <xs:extension base="tns:DataField">
             <xs:sequence>
-              <xs:element name="Data" nillable="true" type="xs:string"/>
+              <xs:element name="Data" nillable="true" type="xs:string">
+                <xs:annotation dws:valueFrom="value"/>
+              </xs:element>
             </xs:sequence>
           </xs:extension>
         </xs:complexContent>
@@ -240,7 +248,9 @@
           <xs:extension base="tns:RequestPageBase">
             <xs:sequence>
               <xs:element minOccurs="0" name="CheckDate" type="xs:dateTime"/>
-              <xs:element name="DomaintableName" nillable="true" type="xs:string"/>
+              <xs:element name="DomaintableName" nillable="true" type="xs:string">
+                <xs:annotation dws:parameter="domaintablename"/>
+              </xs:element>
             </xs:sequence>
           </xs:extension>
         </xs:complexContent>
@@ -507,6 +517,7 @@
       </wsdl:output>
       <wsdl:fault name="DomainTableFaultFault" message="tns:DomainTableService_GetDomainTable_DomainTableFaultFault_FaultMessage" wsaw:Action="http://rws.services.nl/DomainTableWS/2010/10/DomainTableService/GetDomainTableDomainTableFaultFault">
       </wsdl:fault>
+      <wsdl:documentation dws:informationProduct="http://dotwebstack.org/configuration/GetDomainTable"/>
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="basic" type="tns:DomainTableService">

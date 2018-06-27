@@ -4,6 +4,7 @@
 @prefix config: <http://dotwebstack.org/configuration/>.
 @prefix xhtml: <http://www.w3.org/1999/xhtml/vocab#>.
 @prefix elmo-rt: <http://dotwebstack.org/def/elmo/result-type/>.
+@prefix sh: <http://www.w3.org/ns/shacl#>.
 
 GRAPH config:Theatre {
 
@@ -27,6 +28,30 @@ config:GetDomainTableNames a elmo:InformationProduct;
   """
 .
 
+config:DomainTableParameter a elmo:TermParameter;
+  elmo:name "domaintablename";
+  elmo:shape [
+    sh:datatype xsd:string;
+  ]
+.
+config:GetDomainTable a elmo:InformationProduct;
+  elmo:backend config:DBPediaBackend;
+  elmo:resultType elmo-rt:Tuple;
+  elmo:requiredParameter config:DomainTableParameter;
+  elmo:query """
+    select distinct ?domaintablename ?id ?property ?value
+    where {
+      ?domaintable rdfs:label ?name.
+      FILTER(str(?name)=?domaintablename)
+      ?domaintable dbo:product dbr:Car.
+      ?id dbp:tyres ?domaintable.
+      ?id ?property ?value
+      FILTER (lang(?value)="en")
+    }
+    limit 100
+  """
+.
+
 #
 # Ten behoeve van test
 #
@@ -35,10 +60,19 @@ config:GetDomainTableNamesEndpoint a elmo:Endpoint;
   elmo:stage config:Stage;
   elmo:getRepresentation config:getDomainTableNamesRepresentation;
 .
-
 config:getDomainTableNamesRepresentation a elmo:Representation;
   elmo:stage config:Stage;
   elmo:informationProduct config:GetDomainTableNames;
+.
+
+config:GetDomainTableEndpoint a elmo:Endpoint;
+  elmo:pathPattern "/aquo/GetDomainTable";
+  elmo:stage config:Stage;
+  elmo:getRepresentation config:getDomainTableRepresentation;
+.
+config:getDomainTableRepresentation a elmo:Representation;
+  elmo:stage config:Stage;
+  elmo:informationProduct config:GetDomainTable;
 .
 
 }
