@@ -37,7 +37,7 @@
       <xs:complexType name="DomainTableNames">
         <xs:sequence>
           <xs:element maxOccurs="unbounded" minOccurs="0" name="string" nillable="true" type="xs:string">
-            <xs:annotation dws:valueFrom="domaintablename"/>
+            <xs:annotation dws:cursor="true" dws:valuesFrom="domaintablename"/>
           </xs:element>
         </xs:sequence>
       </xs:complexType>
@@ -146,7 +146,9 @@
       <xs:element name="PagingResultSet" nillable="true" type="tns:PagingResultSet"/>
       <xs:complexType name="Data">
         <xs:sequence>
-          <xs:element maxOccurs="unbounded" minOccurs="0" name="DataRow" nillable="true" type="tns:DataRow"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="DataRow" nillable="true" type="tns:DataRow">
+            <xs:annotation dws:cursor="true"/>
+          </xs:element>
         </xs:sequence>
       </xs:complexType>
       <xs:element name="Data" nillable="true" type="tns:Data"/>
