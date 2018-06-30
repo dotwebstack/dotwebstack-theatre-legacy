@@ -129,7 +129,7 @@
             <xs:sequence>
               <xs:element name="Data" nillable="true" type="tns:Data"/>
               <xs:element name="Name" nillable="true" type="xs:string">
-                <xs:annotation dws:valueFrom="domaintablename"/>
+                <xs:annotation dws:valuesFrom="domaintablename"/>
               </xs:element>
             </xs:sequence>
           </xs:extension>
@@ -147,7 +147,7 @@
       <xs:complexType name="Data">
         <xs:sequence>
           <xs:element maxOccurs="unbounded" minOccurs="0" name="DataRow" nillable="true" type="tns:DataRow">
-            <xs:annotation dws:cursor="true"/>
+            <xs:annotation dws:group="true"/>
           </xs:element>
         </xs:sequence>
       </xs:complexType>
@@ -155,7 +155,7 @@
       <xs:complexType name="DataRow">
         <xs:sequence>
           <xs:element name="BeginDate" type="xs:dateTime">
-            <xs:annotation dws:valueFrom="id"/>
+            <xs:annotation dws:valuesFrom="id"/>
           </xs:element>
           <xs:element name="EndDate" type="xs:dateTime"/>
           <xs:element name="Fields" nillable="true" type="tns:Fields"/>
@@ -164,15 +164,19 @@
       <xs:element name="DataRow" nillable="true" type="tns:DataRow"/>
       <xs:complexType name="Fields">
         <xs:sequence>
-          <xs:element maxOccurs="unbounded" minOccurs="0" name="DataField" nillable="true" type="tns:DataField"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="DataField" nillable="true" type="tns:DataField">
+            <xs:annotation dws:cursor="true" dws:groupBy="id"/>
+          </xs:element>
         </xs:sequence>
       </xs:complexType>
       <xs:element name="Fields" nillable="true" type="tns:Fields"/>
       <xs:complexType name="DataField">
         <xs:sequence>
-          <xs:element name="IsNull" type="xs:boolean"/>
+          <xs:element name="IsNull" type="xs:boolean">
+            <xs:annotation dws:valuesFrom="id"/>
+          </xs:element>
           <xs:element name="Name" nillable="true" type="xs:string">
-            <xs:annotation dws:valueFrom="property"/>
+            <xs:annotation dws:valuesFrom="property"/>
           </xs:element>
         </xs:sequence>
       </xs:complexType>
@@ -182,7 +186,7 @@
           <xs:extension base="tns:DataField">
             <xs:sequence>
               <xs:element name="Data" nillable="true" type="xs:string">
-                <xs:annotation dws:valueFrom="value"/>
+                <xs:annotation dws:valuesFrom="value"/>
               </xs:element>
             </xs:sequence>
           </xs:extension>

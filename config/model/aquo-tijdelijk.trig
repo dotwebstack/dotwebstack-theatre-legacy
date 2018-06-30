@@ -48,6 +48,7 @@ config:GetDomainTable a elmo:InformationProduct;
       ?id ?property ?value
       FILTER (lang(?value)="en")
     }
+    order by ?id ?property
     limit 10
   """
 .
