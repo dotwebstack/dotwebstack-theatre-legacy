@@ -63,12 +63,20 @@ public class Context {
     }
     String parameters = "";
     for (Map.Entry<String, String> entry : parameterValues.entrySet()) {
-      parameters += String.format("<parameter><name>%s</name><value>%s</value></parameter>",
-          entry.getKey(), entry.getValue());
+      switch (entry.getKey()) {
+        case "subject": break;
+        case "representation": break;
+        case "date": break;
+        case "format": break;
+        default: {
+          parameters += String.format("<parameter><name>%s</name><value>%s</value></parameter>",
+              entry.getKey(), entry.getValue());
+        }
+      }
     }
     contextXml = String.format(CONTEXT_TEMPLATE, docRoot, docRoot, linkstrategy, title, path,
         fullUrl, subject, stylesheet, subdomain, parameters);
-        
+
     LOG.debug(contextXml);
   }
 
