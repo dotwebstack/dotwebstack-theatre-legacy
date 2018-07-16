@@ -42,8 +42,10 @@ GRAPH config:Theatre {
   config:ResourceRepresentation a elmo:Representation;
     elmo:stage config:Stage;
     elmo:contains config:Menu;
+    elmo:contains config:Parameters;
     elmo:appliesTo "http://dbpedia.org/resource/{reference}";
     elmo:informationProduct config:DbpediaData;
+    elmo:parameterMapper config:SubjectFromUrl; #Endpoint mapper should be sufficient, but doesn't work!
   .
 
   #Information Product
@@ -66,5 +68,23 @@ GRAPH config:Theatre {
       }
     """;
   .
+
+#Sub Representation
+config:Parameters a elmo:Representation;
+  elmo:stage config:Stage;
+  elmo:informationProduct config:ParametersData
+.
+#Sub information product (check for parameter mapper)
+config:ParametersData a elmo:InformationProduct;
+  elmo:backend config:DBPediaBackend;
+  elmo:requiredParameter elmo:SubjectParameter;
+  elmo:query """
+    CONSTRUCT {
+      <urn:value> rdf:subject "?subject".
+      <urn:value> rdf:subject ?subject
+    }
+    WHERE {}
+  """
+.
 
 }

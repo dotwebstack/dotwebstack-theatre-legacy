@@ -91,7 +91,7 @@ public class CreatePage {
       }
       configMerger.finishMerging();
       //Translate to elmo1 vocabulary configuration
-      StartTerminal configPipe1 = new StartTerminal(
+      final StartTerminal configPipe1 = new StartTerminal(
           null,
           new ByteArrayInputStream(appearanceData.toByteArray())) {
         @Override
@@ -108,6 +108,9 @@ public class CreatePage {
           parameterValues.put(name, value.get(0));
         }
       });
+      // add parameter values from mappers (only top representation)
+      representation.getParameterMappers().forEach(
+          parameterMapper -> parameterValues.putAll(parameterMapper.map(containerRequestContext)));
       //Merge configuration result with context (empty at this moment)
       Context context = new Context(containerRequestContext, linkstrategy,
           representation.getStage(), parameterValues);
