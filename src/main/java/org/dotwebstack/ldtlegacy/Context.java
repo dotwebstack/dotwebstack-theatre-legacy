@@ -20,7 +20,7 @@ public class Context {
       "<context docroot='%s' staticroot='%s/assets' linkstrategy='%s'>"
           + "<title>%s</title><request-path>%s</request-path><url>%s</url>"
           + "<subject>%s</subject>%s<subdomain>%s</subdomain>"
-          + "<language>%s</language><parameters>%s</parameters>"
+          + "<parameters>%s</parameters><language>%s</language>"
           + "</context>";
 
   private final String contextXml;
@@ -96,7 +96,7 @@ public class Context {
       }
     }
     contextXml = String.format(CONTEXT_TEMPLATE, docRoot, docRoot, linkstrategy, title, path,
-        fullUrl, subject, stylesheet, subdomain, language, parameters);
+        fullUrl, subject, stylesheet, subdomain, parameters, language);
   }
 
   public String getContextXml() {
