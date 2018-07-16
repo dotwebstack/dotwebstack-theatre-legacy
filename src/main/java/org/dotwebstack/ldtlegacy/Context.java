@@ -1,6 +1,8 @@
 package org.dotwebstack.ldtlegacy;
 
 import java.net.URI;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import javax.ws.rs.container.ContainerRequestContext;
 import lombok.NonNull;
@@ -18,10 +20,27 @@ public class Context {
       "<context docroot='%s' staticroot='%s/assets' linkstrategy='%s'>"
           + "<title>%s</title><request-path>%s</request-path><url>%s</url>"
           + "<subject>%s</subject>%s<subdomain>%s</subdomain>"
-          + "<parameters>%s</parameters>"
+          + "<parameters>%s</parameters><language>%s</language>"
           + "</context>";
 
   private final String contextXml;
+
+  private String getAcceptLanguage(ContainerRequestContext containerRequestContext) {
+    final String acceptLanguage = containerRequestContext.getHeaderString("Accept-Language");
+    String language = "en";
+    if (acceptLanguage != null) {
+      final List<Locale.LanguageRange> ranges = Locale.LanguageRange.parse(acceptLanguage);
+      if (ranges != null) {
+        if (ranges.size() != 0) {
+          Locale acceptLocale = Locale.forLanguageTag(ranges.get(0).getRange());
+          if (acceptLocale != null) {
+            language = acceptLocale.getLanguage();
+          }
+        }
+      }
+    }
+    return language;
+  }
 
   public Context(@NonNull ContainerRequestContext containerRequestContext, String linkstrategy,
                  Stage stage, Map<String, String> parameterValues) {
@@ -32,6 +51,7 @@ public class Context {
      */
     final String path = uri.getPath().replaceAll("^/" + uri.getHost(), "");
     final String fullUrl = String.format("%s://%s%s", uri.getScheme(), uri.getAuthority(), path);
+    final String language = getAcceptLanguage(containerRequestContext);
     String title = "LDT 2.0 alfa";
     if (stage.getTitle() != null) {
       title = stage.getTitle();
@@ -76,9 +96,7 @@ public class Context {
       }
     }
     contextXml = String.format(CONTEXT_TEMPLATE, docRoot, docRoot, linkstrategy, title, path,
-        fullUrl, subject, stylesheet, subdomain, parameters);
-
-    LOG.debug(contextXml);
+        fullUrl, subject, stylesheet, subdomain, parameters, language);
   }
 
   public String getContextXml() {
