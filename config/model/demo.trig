@@ -132,9 +132,11 @@ GRAPH config:Theatre {
   config:FormatIndexData a elmo:InformationProduct;
     elmo:backend config:DBPediaBackend;
     elmo:query """
+      prefix elmo1: <http://bp4mc2.org/elmo/def#>
       CONSTRUCT {
         [] rdfs:label "a|b|c";
-           rdf:value "x|y|z"
+           rdf:value "x|y|z";
+           elmo1:name "test"
       }
       WHERE {}
     """;
