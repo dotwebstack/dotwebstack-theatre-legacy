@@ -188,45 +188,6 @@ GRAPH config:Theatre {
 
 # ==========================
 #
-# Generic resource (assuming dbpedia)
-#
-# ==========================
-
-  config:DBPediaResourceEndpoint a elmo:Endpoint;
-    elmo:pathPattern "/demo/resource";
-    elmo:stage config:Stage;
-    elmo:getRepresentation config:DBPediaResource;
-  .
-
-  config:DBPediaResource a elmo:Representation;
-    elmo:stage config:Stage;
-    elmo:informationProduct config:DBPediaResourceData;
-  .
-  config:SubjectParameter a elmo:TermParameter;
-    elmo:name "subject";
-    elmo:shape [
-      sh:nodeKind sh:IRI;
-      #sh:datatype xsd:string;
-    ];
-  .
-  config:DBPediaResourceData a elmo:InformationProduct;
-    elmo:backend config:DBPediaBackend;
-    elmo:requiredParameter config:SubjectParameter;
-    elmo:query """
-      CONSTRUCT {
-#        <${subject}> ?p ?o
-        ?subject ?p ?o
-      }
-      WHERE {
-#        <${subject}> ?p ?o
-        ?subject ?p ?o
-        FILTER (?p=rdf:type || ?p=rdfs:label)
-      }
-    """;
-  .
-
-# ==========================
-#
 # Amersfoort (with appearance, CONSTRUCT = ResourceAppearance)
 #
 # ==========================
