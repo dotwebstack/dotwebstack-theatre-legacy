@@ -8,27 +8,45 @@
 
 GRAPH config:Theatre {
 
-    config:SubjectFromUrl a elmo:UriParameterMapper;
-      elmo:source http:requestURI;
-      elmo:pattern "http://{domain}/id/{reference}";
-      elmo:template "http://dbpedia.org/resource/{reference}";
-      elmo:target elmo:SubjectParameter;
-    .
+  #Redirect
+  config:ResourceRedirection a elmo:Redirection;
+    elmo:stage config:Stage;
+     elmo:pathPattern "/id/{reference}";
+     elmo:redirectTemplate "/doc/{reference}";
+  .
 
-    config:DocEndpoint a elmo:DynamicEndpoint;
-      rdfs:label "label";
-      elmo:stage config:Stage;
-      elmo:pathPattern "/id/{reference}";
-      elmo:parameterMapper config:SubjectFromUrl;
-    .
+  #Parameter mapping
+  config:SubjectFromUrl a elmo:UriParameterMapper;
+    elmo:source http:requestURI;
+    elmo:pattern "http://{domain}/doc/{reference}";
+    elmo:template "http://dbpedia.org/resource/{reference}";
+    elmo:target elmo:SubjectParameter;
+  .
 
-    config:ResourceRepresentation a elmo:Representation;
-      elmo:stage dbeerpedia:Stage;
-      elmo:contains config:Menu;
-      elmo:appliesTo "http://dbpedia.org/resource/{reference}";
-      elmo:informationProduct config:DbpediaData;
-    .
+  #Dynamic endpoint
+  config:DocEndpoint a elmo:DynamicEndpoint;
+    rdfs:label "label";
+    elmo:stage config:Stage;
+    elmo:pathPattern "/doc/{reference}";
+    elmo:parameterMapper config:SubjectFromUrl;
+  .
 
+  #Static endpoint
+  config:DBPediaResourceEndpoint a elmo:Endpoint;
+    elmo:pathPattern "/resource";
+    elmo:stage config:Stage;
+    elmo:getRepresentation config:ResourceRepresentation;
+  .
+
+  #Representation
+  config:ResourceRepresentation a elmo:Representation;
+    elmo:stage config:Stage;
+    elmo:contains config:Menu;
+    elmo:appliesTo "http://dbpedia.org/resource/{reference}";
+    elmo:informationProduct config:DbpediaData;
+  .
+
+  #Information Product
   config:DbpediaData a elmo:InformationProduct;
     elmo:backend config:DBPediaBackend;
     elmo:requiredParameter elmo:SubjectParameter;
@@ -50,4 +68,3 @@ GRAPH config:Theatre {
   .
 
 }
-
