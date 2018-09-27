@@ -57,7 +57,7 @@
 					</xsl:if>
 					<xsl:value-of select="elmo2:appliesTo"/>
 				</elmo:applies-to>
-				<xsl:copy-of select="rdfs:label|xhtml:glossary|xhtml:stylesheet|rdf:value|xhtml:link"/>
+				<xsl:copy-of select="rdfs:label|xhtml:glossary|xhtml:stylesheet|rdf:value|xhtml:link|xhtml:icon"/>
 				<xsl:for-each select="elmo2:backmap">
 					<elmo:backmap><xsl:value-of select="."/></elmo:backmap>
 				</xsl:for-each>
