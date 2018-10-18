@@ -22,19 +22,9 @@ import org.eclipse.rdf4j.rio.rdfxml.RDFXMLWriter;
 
 public class FrameworkGhost {
 
-  public static Object fetchInformationProductData(Representation representation,
-                                                   Map<String, String> parameterValues,
-                                                   ContainerRequestContext context) {
-    representation.getParameterMappers().forEach(parameterMapper ->
-        parameterValues.putAll(parameterMapper.map(context)));
-    return representation.getInformationProduct().getResult(parameterValues);
-  }
-
   public static void getXml(Representation representation, Map<String, String> parameterValues,
                             OutputStream outputStream,
                             ContainerRequestContext containerRequestContext) {
-    representation.getParameterMappers().forEach(
-        parameterMapper -> parameterValues.putAll(parameterMapper.map(containerRequestContext)));
     Object result = representation.getInformationProduct().getResult(parameterValues);
     if (result instanceof GraphQueryResult) {
       QueryResults.report((GraphQueryResult) result, new RDFXMLWriter(outputStream));
