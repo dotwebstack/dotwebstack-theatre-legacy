@@ -81,6 +81,7 @@ public class Context {
     if (parameterValues.containsKey("subject")) {
       subject = parameterValues.get("subject");
     }
+
     String parameters = "";
     for (Map.Entry<String, String> entry : parameterValues.entrySet()) {
       switch (entry.getKey()) {
