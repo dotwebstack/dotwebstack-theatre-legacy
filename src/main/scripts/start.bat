@@ -1,3 +1,3 @@
 @echo off
-java -jar jar/dotwebstack-theatre-legacy.jar
+java -jar dotwebstack-theatre-legacy.jar
 pause

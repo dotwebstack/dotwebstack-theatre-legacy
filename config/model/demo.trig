@@ -176,6 +176,7 @@ GRAPH config:Theatre {
             <p>You can check this demo configuration via the following links:</p>
             <ul>
               <li><a href="/demo/amersfoort">Amersfoort triples from dbpedia</a></li>
+              <li><a href="/demo/cities">Dutch cities from dbpedia</a></li>
               <li><a href="/dbp/ld/v1/graph-breweries">Breweries triples from local triplestore</a></li>
               <li><a href="/dbp/ld/v1/tuple-breweries">Breweries tuples from local triplestore</a></li>
             </ul>
@@ -185,6 +186,40 @@ GRAPH config:Theatre {
       WHERE {}
     """
   .
+
+  # ==========================
+  #
+  # Dutch cities
+  #
+  # ==========================
+
+  config:CitiesEndpoint a elmo:Endpoint;
+      elmo:pathPattern "/demo/cities";
+      elmo:stage config:Stage;
+      elmo:getRepresentation config:Cities;
+    .
+
+    config:Cities a elmo:Representation;
+      elmo:stage config:Stage;
+      elmo:contains config:Menu;
+      elmo:appearance config:CitiesAppearance;
+      elmo:informationProduct config:CitiesData
+    .
+    config:CitiesAppearance a elmo:TableAppearance;
+    .
+    config:CitiesData a elmo:InformationProduct;
+      elmo:backend config:DBPediaBackend;
+      elmo:resultType elmo-rt:Tuple;
+      elmo:query """
+        PREFIX dbo: <http://dbpedia.org/ontology/>
+        SELECT ?city ?cityname
+        WHERE {
+          ?city dbo:type <http://dbpedia.org/resource/Cities_of_the_Netherlands>.
+          ?city rdfs:label ?cityname.
+          FILTER (lang(?cityname)="en")
+        }
+      """;
+    .
 
 # ==========================
 #
@@ -716,7 +751,7 @@ config:AmersfoortEndpoint a elmo:Endpoint;
     elmo:appearance [ a elmo:LoginAppearance];
     elmo:informationProduct config:LoginData;
   .
-  
+
   config:LoginData a elmo:InformationProduct;
     elmo:backend config:LocalBackend;
     elmo:resultType elmo-rt:Tuple;
@@ -725,4 +760,28 @@ config:AmersfoortEndpoint a elmo:Endpoint;
       WHERE {}
     """
   .
+
+  # ==========================
+  #
+  # Vehicle names IP for API and SOAP
+  #
+  # ==========================
+
+  config:GetVehicleNames a elmo:InformationProduct;
+    elmo:backend config:DBPediaBackend;
+    elmo:resultType elmo-rt:Tuple;
+    elmo:query """
+      prefix dbo: <http://dbpedia.org/ontology/>
+      prefix dbr: <http://dbpedia.org/resource/>
+      prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+      select ?name
+      where {
+        ?s rdfs:label ?name.
+        ?s dbo:product dbr:Car
+        filter (lang(?name)="en")
+      }
+      limit 100
+    """
+  .
+
 }

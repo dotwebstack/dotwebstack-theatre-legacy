@@ -35,7 +35,7 @@
   <files>
     <file>
       <source>target/${artifactId}-${version}.${packaging}</source>
-      <outputDirectory>jar</outputDirectory>
+      <outputDirectory>.</outputDirectory>
       <destName>dotwebstack-theatre-legacy.jar</destName>
     </file>
   </files>
