@@ -1,8 +1,8 @@
 <!--
 
-    NAME     sparql2rdfa.xsl
-    VERSION  1.21.0
-    DATE     2018-03-19
+    NAME     DWS sparql2rdfa.xsl
+    VERSION  1.23.0
+    DATE     2018-10-20
 
     Copyright 2012-2018
 
@@ -27,7 +27,8 @@
     Transformation of a RDF document or SPARQL resultset to a RDF document
 
 	TODO: Transfer functionality from sparql2rdfa
-	
+
+	CHANGED: Some small changes were made to get this working in the dotwebstack
 -->
 <xsl:stylesheet version="2.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -39,8 +40,7 @@
 	xmlns:dcterms="http://purl.org/dc/terms/"
 	xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
 >
-<!-- ADDED PARAM -->
-<xsl:param name="args"/>
+<xsl:param name="args"/> <!-- CHANGED: Added this line -->
 
 <xsl:key name="fragment" match="/root/view/representation[$args]/fragment" use="@applies-to"/> <!-- CHANGED: added '/view' -->
 
@@ -48,17 +48,33 @@
 <!-- Annotation of RDF document -->
 <!-- ************************** -->
 
+<xsl:template match="*" mode="flatten">
+	<rdf:Description rdf:nodeID="{generate-id()}">
+		<xsl:copy-of select="*[not(@rdf:parseType='Resource')]"/>
+		<xsl:for-each select="*[@rdf:parseType='Resource']">
+			<xsl:element name="{name()}">
+				<xsl:attribute name="rdf:nodeID"><xsl:value-of select="generate-id()"/></xsl:attribute>
+			</xsl:element>
+		</xsl:for-each>
+	</rdf:Description>
+	<xsl:apply-templates select="*[@rdf:parseType='Resource']" mode="flatten"/>
+</xsl:template>
+
 <!-- RDF document -->
 <xsl:template match="rdf:RDF">
 	<!-- Order by identifier -->
 	<rdf:RDF>
-		<xsl:for-each-group select="rdf:Description" group-by="(@rdf:nodeID|@rdf:about)"><xsl:sort select="(@rdf:nodeID|@rdf:about)"/>
+		<xsl:for-each-group select="*[exists(@rdf:nodeID|@rdf:about)]" group-by="(@rdf:nodeID|@rdf:about)"><xsl:sort select="(@rdf:nodeID|@rdf:about)"/>
 			<rdf:Description>
 				<xsl:if test="exists(@rdf:nodeID)"><xsl:attribute name="rdf:nodeID" select="@rdf:nodeID"/></xsl:if>
 				<xsl:if test="exists(@rdf:about)"><xsl:attribute name="rdf:about" select="@rdf:about"/></xsl:if>
+				<xsl:if test="local-name()!='Description'">
+					<rdf:type rdf:resource="{namespace-uri()}{local-name()}"/>
+				</xsl:if>
 				<xsl:copy-of select="current-group()/*"/>
 			</rdf:Description>
 		</xsl:for-each-group>
+		<xsl:apply-templates select="*[not(exists(@rdf:nodeID|@rdf:about))]" mode="flatten"/>
 	</rdf:RDF>
 </xsl:template>
 

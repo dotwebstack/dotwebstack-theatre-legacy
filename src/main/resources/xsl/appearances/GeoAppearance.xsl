@@ -1,8 +1,8 @@
 <!--
 
     NAME     GeoAppearance.xsl
-    VERSION  1.21.0
-    DATE     2018-03-19
+    VERSION  1.23.0
+    DATE     2018-10-20
 
     Copyright 2012-2018
 

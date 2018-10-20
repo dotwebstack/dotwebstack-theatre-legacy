@@ -1,8 +1,8 @@
 <!--
 
-    NAME     rdf2view.xsl
-    VERSION  1.21.0
-    DATE     2018-03-19
+    NAME     DWS rdf2view.xsl
+    VERSION  1.23.0
+    DATE     2018-10-20
 
     Copyright 2012-2018
 
@@ -25,6 +25,8 @@
 <!--
     DESCRIPTION
 	Transforms RDF configuration result into a more manageable view XML document
+
+	CHANGED: A small change was necessary for the index position, the rest of the code is identical
 -->
 
 <xsl:stylesheet version="2.0"
@@ -37,20 +39,26 @@
 
 <xsl:output method="xml" version="1.0" encoding="UTF-8" indent="no"/>
 
-<xsl:key name="bnodes" match="root/rdf:RDF/rdf:Description" use="@rdf:nodeID"/>
-<xsl:key name="resources" match="root/rdf:RDF/rdf:Description" use="@rdf:about"/>
+<xsl:key name="bnodes" match="root/rdf:RDF/*[exists(@rdf:nodeID)]" use="@rdf:nodeID"/>
+<xsl:key name="resources" match="root/rdf:RDF/*[exists(@rdf:about)]" use="@rdf:about"/>
 <xsl:key name="parameters" match="root/context/parameters/parameter" use="name"/>
 
 <xsl:template match="elmo:fragment">
 	<xsl:if test="exists(@rdf:nodeID)">
-		<xsl:variable name="appliesTo" select="key('bnodes',@rdf:nodeID)/elmo:applies-to"/>
+		<xsl:variable name="fragment" select="key('bnodes',@rdf:nodeID)"/>
+		<xsl:variable name="appliesTo" select="$fragment/elmo:applies-to[not(exists(@rdf:nodeID))]"/>
 		<xsl:variable name="satisfied">
-			<xsl:for-each select="key('resources',key('bnodes',@rdf:nodeID)/elmo:valuesFrom/@rdf:resource)[elmo:with-parameter!=$appliesTo]">
+			<xsl:for-each select="key('resources',$fragment/elmo:valuesFrom/@rdf:resource)[elmo:with-parameter!=$appliesTo]">
 				<xsl:if test="not(exists(key('parameters',elmo:with-parameter)))">N</xsl:if>
 			</xsl:for-each>
 		</xsl:variable>
 		<fragment applies-to="{$appliesTo/@rdf:resource}{$appliesTo}" satisfied="{$satisfied}">
-			<xsl:copy-of select="key('bnodes',@rdf:nodeID)/(* except elmo:applies-to)"/>
+			<xsl:if test="$fragment/elmo:applies-to/@rdf:nodeID!=''">
+				<xsl:variable name="subfragment" select="key('bnodes',$fragment/elmo:applies-to/@rdf:nodeID)"/>
+				<xsl:attribute name="filter-property" select="concat($subfragment/*/namespace-uri(),$subfragment/*/local-name())"/>
+				<xsl:attribute name="filter-value" select="$subfragment/*[1]/(text()|@rdf:resource)"/>
+			</xsl:if>
+			<xsl:copy-of select="$fragment/(* except elmo:applies-to)"/>
 		</fragment>
 	</xsl:if>
 	<xsl:if test="exists(@rdf:resource)">
@@ -131,12 +139,12 @@
 			<rep uri="{@rdf:about}"><xsl:value-of select="position()"/></rep>
 		</xsl:for-each-group>
 	</xsl:variable>
-	<!-- CHANGE END -->
+	<!-- END CHANGED -->
 	<view>
-		<xsl:apply-templates select="rdf:RDF/rdf:Description[rdf:type/@rdf:resource!='http://bp4mc2.org/elmo/def#fragment']/html:stylesheet"/>
-		<xsl:for-each-group select="rdf:RDF/rdf:Description[exists(elmo:data[1]) or exists(elmo:query[.!='']) or exists(elmo:service[1]) or exists(elmo:webpage[1]) or exists(elmo:queryForm[1]) or rdf:type/@rdf:resource='http://bp4mc2.org/elmo/def#Production']" group-by="@rdf:about"><!--CHANGED: not ordered <xsl:sort select="concat(elmo:index[1],'~')"/>-->
+		<xsl:apply-templates select="rdf:RDF/(elmo:Fragment|rdf:Description[rdf:type/@rdf:resource!='http://bp4mc2.org/elmo/def#fragment'])/html:stylesheet"/>
+		<xsl:for-each-group select="rdf:RDF/(*|*/elmo:contains/*)[exists(elmo:data[1]) or exists(elmo:query[.!='']) or exists(elmo:service[1]) or exists(elmo:webpage[1]) or exists(elmo:queryForm[1]) or rdf:type/@rdf:resource='http://bp4mc2.org/elmo/def#Production']" group-by="@rdf:about"><xsl:sort select="concat(elmo:index[1],'~')"/>
 			<xsl:variable name="repuri"><xsl:value-of select="@rdf:about"/></xsl:variable>
-			<xsl:variable name="repindex"><xsl:value-of select="$index/rep[@uri=$repuri]"/></xsl:variable>
+			<xsl:variable name="repindex"><xsl:value-of select="$index/rep[@uri=$repuri]"/></xsl:variable> <!-- CHANGED use $index instead of position() -->
 			<xsl:variable name="with-filter-notok">
 				<xsl:for-each select="elmo:with-parameter">
 					<xsl:if test="not(exists(key('parameters', .)) or (.='subject' and /root/context/subject!=''))">x</xsl:if>
@@ -162,7 +170,7 @@
 					<xsl:when test="rdf:type/@rdf:resource='http://bp4mc2.org/elmo/def#Scene'">
 						<xsl:if test="exists(elmo:query[.!=''])">
 							<xsl:variable name="queryForm">
-								<xsl:apply-templates select="../rdf:Description[elmo:contains/@rdf:resource=$repuri]/elmo:queryForm"/>
+								<xsl:apply-templates select="../*[elmo:contains/@rdf:resource=$repuri]/elmo:queryForm"/>
 							</xsl:variable>
 							<!-- Don't include the scene if the queryForm is not satisfied -->
 							<xsl:if test="not($queryForm/queryForm/@satisfied!='')">
@@ -201,16 +209,18 @@
 									?sc?pc?oc.
 									?scc?pcc?occ.
 								}
-								WHERE { GRAPH <]]><xsl:value-of select="/root/context/representation-graph/@uri"/><![CDATA[>
-								{<]]><xsl:value-of select="$repuri"/><![CDATA[> elmo:data ?s.
-									?s?p?o.
-									OPTIONAL {
+								WHERE { GRAPH <]]><xsl:value-of select="/root/context/representation-graph/@uri"/><![CDATA[> {
+									{<]]><xsl:value-of select="$repuri"/><![CDATA[> elmo:data ?s.
+										?s?p?o.
+									}
+									UNION {<]]><xsl:value-of select="$repuri"/><![CDATA[> elmo:data ?s.
 										?s elmo:data ?sc.
-										?sc ?pc ?oc.
-										OPTIONAL {
-											?sc elmo:data ?scc.
-											?scc ?pcc ?occ.
-										}
+										?sc ?pc ?oc
+									}
+									UNION {<]]><xsl:value-of select="$repuri"/><![CDATA[> elmo:data ?s.
+										?s elmo:data ?sc.
+										?sc elmo:data ?scc.
+										?scc ?pcc ?occ.
 									}
 								}}
 								]]>

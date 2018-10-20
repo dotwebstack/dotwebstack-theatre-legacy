@@ -1,8 +1,8 @@
 <!--
 
     NAME     TurtleAppearance.xsl
-    VERSION  1.21.0
-    DATE     2018-03-19
+    VERSION  DWS 1.23.0
+    DATE     2018-10-20
 
     Copyright 2012-2018
 
@@ -28,6 +28,8 @@
 
 	A turtle appearance shows the data as plain turtle within a html frame
 
+	CHANGED: The include for the turtle appearance is different, the rest of the code is identical
+
 -->
 <xsl:stylesheet version="2.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -40,7 +42,7 @@
 
 <xsl:output method="xml" indent="yes"/>
 
-<xsl:include href="rdf2turtle.xsl"/>
+<xsl:include href="rdf2turtle.xsl"/> <!-- CHANGED: removed ../, due to difference in xsl processing -->
 
 <xsl:template match="rdf:RDF" mode="TurtleAppearance">
 	<pre>

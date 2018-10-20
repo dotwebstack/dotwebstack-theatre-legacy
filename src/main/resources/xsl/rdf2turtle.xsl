@@ -1,8 +1,8 @@
 <!--
 
     NAME     rdf2turtle.xsl
-    VERSION  1.21.0
-    DATE     2018-03-19
+    VERSION  1.23.0
+    DATE     2018-10-20
 
     Copyright 2012-2018
 
@@ -27,7 +27,7 @@
 	Transformation of RDF document to turtle format
 
 	Used by TurtleAppearance.xsl and rdf2ttl.xsl
-	
+
 -->
 <xsl:stylesheet version="2.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -53,7 +53,7 @@
 	<!-- Default prefixes -->
 	<prefix name="xsd">http://www.w3.org/2001/XMLSchema#</prefix>
 	<!-- Prefixes used in properties -->
-	<xsl:for-each-group select="rdf:Description/*" group-by="substring-before(name(),':')">
+	<xsl:for-each-group select="*/*" group-by="substring-before(name(),':')">
 		<xsl:variable name="prefix" select="substring-before(name(),':')"/>
 		<xsl:choose>
 			<xsl:when test="$prefix!=''"><prefix name="{substring-before(name(),':')}"><xsl:value-of select="namespace-uri()"/></prefix></xsl:when>
@@ -67,7 +67,7 @@
 		</xsl:choose>
 	</xsl:for-each-group>
 	<!-- Prefixes used in subject position -->
-	<xsl:for-each-group select="rdf:Description" group-by="replace(@rdf:about,'(/|#|\\)([0-9A-Za-z-_~]+)$','$1')"><xsl:sort select="replace(@rdf:about,'(/|#|\\)([0-9A-Za-z-_~]+)$','$1')" order="descending"/>
+	<xsl:for-each-group select="*[exists(@rdf:about)]" group-by="replace(@rdf:about,'(/|#|\\)([0-9A-Za-z-_~]+)$','$1')"><xsl:sort select="replace(@rdf:about,'(/|#|\\)([0-9A-Za-z-_~]+)$','$1')" order="descending"/>
 		<xsl:variable name="prefix" select="replace(@rdf:about,'(/|#|\\)([0-9A-Za-z-_~]+)$','$1')"/>
 		<xsl:if test="$prefix!='' and substring-after(@rdf:about,$prefix)!=''">
 			<prefix name="n{position()}"><xsl:value-of select="$prefix"/></prefix>
@@ -170,6 +170,11 @@
 </xsl:text>
 			<xsl:value-of select="fn:rdf2turtle-spaces(-4+$tab)"/><xsl:text>]</xsl:text>
 		</xsl:when>
+		<xsl:when test="exists(*/@rdf:about)">
+			<xsl:apply-templates select="*/@rdf:about" mode="rdf2turtle-uri">
+				<xsl:with-param name="prefix" select="$prefix"/>
+			</xsl:apply-templates>
+		</xsl:when>
 		<xsl:otherwise>
 			<xsl:apply-templates select="." mode="rdf2turtle-literal"/>
 		</xsl:otherwise>
@@ -184,6 +189,43 @@
 	</xsl:apply-templates>
 </xsl:template>
 
+<xsl:template match="@rdf:about" mode="resource">
+	<xsl:param name="prefix"/>
+	<xsl:variable name="about" select="."/>
+	<xsl:apply-templates select="." mode="rdf2turtle-uri"><xsl:with-param name="prefix" select="$prefix"/></xsl:apply-templates>
+	<xsl:variable name="nodetype" select="../name()"/>
+	<xsl:for-each-group select="../../*[@rdf:about=$about]" group-by="@rdf:about">
+		<xsl:variable name="hastype" select="$nodetype!='rdf:Description' or exists(current-group()/rdf:type)"/>
+		<xsl:if test="$hastype"><xsl:text> a </xsl:text>
+			<xsl:if test="$nodetype!='rdf:Description'">
+				<xsl:value-of select="$nodetype"/>
+			</xsl:if>
+			<xsl:for-each select="current-group()/rdf:type"><xsl:sort select="@rdf:resource"/>
+				<xsl:if test="$nodetype!='rdf:Description' or position()!=1">, </xsl:if>
+				<xsl:apply-templates select="." mode="rdf2turtle-object">
+					<xsl:with-param name="prefix" select="$prefix"/>
+				</xsl:apply-templates>
+			</xsl:for-each>
+		</xsl:if>
+		<xsl:for-each select="current-group()/*"><xsl:sort select="name()"/><xsl:sort select="@rdf:resource"/>
+			<xsl:if test="name()!='rdf:type'">
+				<xsl:choose><xsl:when test="$hastype or position()!=1"><xsl:text>;
+	    </xsl:text></xsl:when>
+					<xsl:otherwise><xsl:text> </xsl:text></xsl:otherwise>
+				</xsl:choose>
+				<xsl:apply-templates select="." mode="rdf2turtle-triple">
+					<xsl:with-param name="tab">9</xsl:with-param>
+					<xsl:with-param name="prefix" select="$prefix"/>
+				</xsl:apply-templates>
+			</xsl:if>
+		</xsl:for-each>
+.
+<xsl:for-each select="current-group()/*/*/@rdf:about"><xsl:sort select="."/>
+<xsl:apply-templates select="." mode="resource"><xsl:with-param name="prefix" select="$prefix"/></xsl:apply-templates>
+</xsl:for-each>
+</xsl:for-each-group>
+</xsl:template>
+
 <xsl:template match="rdf:RDF" mode="rdf2turtle">
 <xsl:variable name="prefix"><xsl:apply-templates select="." mode="rdf2turtle-getprefixes"/></xsl:variable>
 <xsl:for-each-group select="$prefix/prefix" group-by="."><xsl:sort select="@name"/>
@@ -192,14 +234,18 @@
 	<xsl:text>>.
 </xsl:text>
 </xsl:for-each-group>
-<xsl:for-each-group select="rdf:Description" group-by="@rdf:about"><xsl:sort select="@rdf:about"/>
+<xsl:for-each-group select="*" group-by="@rdf:about"><xsl:sort select="@rdf:about"/>
 	<xsl:apply-templates select="@rdf:about" mode="rdf2turtle-uri">
 		<xsl:with-param name="prefix" select="$prefix"/>
 	</xsl:apply-templates>
-	<xsl:variable name="hastype" select="exists(current-group()/rdf:type)"/>
+	<xsl:variable name="nodetype" select="name()"/>
+	<xsl:variable name="hastype" select="$nodetype!='rdf:Description' or exists(current-group()/rdf:type)"/>
 	<xsl:if test="$hastype"><xsl:text> a </xsl:text>
+		<xsl:if test="$nodetype!='rdf:Description'">
+			<xsl:value-of select="$nodetype"/>
+		</xsl:if>
 		<xsl:for-each select="current-group()/rdf:type"><xsl:sort select="@rdf:resource"/>
-			<xsl:if test="position()!=1">, </xsl:if>
+			<xsl:if test="$nodetype!='rdf:Description' or position()!=1">, </xsl:if>
 			<xsl:apply-templates select="." mode="rdf2turtle-object">
 				<xsl:with-param name="prefix" select="$prefix"/>
 			</xsl:apply-templates>
@@ -218,6 +264,9 @@
 		</xsl:if>
 	</xsl:for-each>
 .
+<xsl:for-each select="current-group()/*/*/@rdf:about"><xsl:sort select="."/>
+<xsl:apply-templates select="." mode="resource"><xsl:with-param name="prefix" select="$prefix"/></xsl:apply-templates>
+</xsl:for-each>
 </xsl:for-each-group>
 </xsl:template>
 
