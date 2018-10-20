@@ -1,8 +1,8 @@
 <!--
 
     NAME     ChartAppearance.xsl
-    VERSION  1.21.0
-    DATE     2018-03-19
+    VERSION  1.23.0
+    DATE     2018-10-20
 
     Copyright 2012-2018
 
@@ -25,11 +25,11 @@
 <!--
     DESCRIPTION
 	ChartAppearance, add-on of rdf2html.xsl
-	
+
 	Show linked data as a Chart.
-	
+
 	TODO: Chart appearance now uses rdfs:label (X axes) and rdf:value (Y axes). Should probably use datacube ontology.
-	
+
 -->
 <xsl:stylesheet version="2.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -48,53 +48,12 @@
 		<div id="chart" class="panel-body">
 		</div>
 	</div>
+	<script src="{$staticroot}/js/chart.min.js" type="text/javascript"/>
 	<script>
 		var data=[<xsl:for-each select="rdf:Description"><xsl:if test="position()!=1">,</xsl:if>{name:"<xsl:value-of select="rdfs:label"/>",value:<xsl:value-of select="rdf:value"/>}</xsl:for-each>];
 
-		var margin = {top: 20, right: 30, bottom: 30, left: 40},
-			width = 800 - margin.left - margin.right,
-			height = 200 - margin.top - margin.bottom;
+		plotChart(data,"<xsl:value-of select="substring-after(@elmo:appearance,'#')"/>")
 
-		var x = d3.scale.ordinal()
-			.rangeRoundBands([0, width], .1);
-
-		var y = d3.scale.linear()
-			.range([height, 0])
-
-		var xAxis = d3.svg.axis()
-			.scale(x)
-			.orient("bottom");
-
-		var yAxis = d3.svg.axis()
-			.scale(y)
-			.orient("left");
-
-		var chart = d3.select("#chart").append("svg")
-			.attr("width", width + margin.left + margin.right)
-			.attr("height", height + margin.top + margin.bottom)
-		  .append("g")
-			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-		x.domain(data.map(function (d) {return d.name;}));
-		y.domain([0,d3.max(data, function (d) {return d.value;})]);
-			
-		  chart.append("g")
-			  .attr("class", "x axis")
-			  .attr("transform", "translate(0," + height + ")")
-			  .call(xAxis);
-
-		  chart.append("g")
-			  .attr("class", "y axis")
-			  .call(yAxis);
-
-		  chart.selectAll(".bar")
-			  .data(data)
-			.enter().append("rect")
-			  .attr("class", "bar")
-			  .attr("x", function(d) { return x(d.name); })
-			  .attr("y", function(d) { return y(d.value); })
-			  .attr("height", function(d) { return height - y(d.value); })
-			  .attr("width", x.rangeBand());
 	</script>
 </xsl:template>
 

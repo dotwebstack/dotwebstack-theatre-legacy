@@ -1,8 +1,8 @@
 <!--
 
-    NAME     LoginAppearance.xsl
-    VERSION  1.21.0
-    DATE     2018-03-19
+    NAME     DWS LoginAppearance.xsl
+    VERSION  1.23.0
+    DATE     2018-10-20
 
     Copyright 2012-2018
 
@@ -25,9 +25,11 @@
 <!--
     DESCRIPTION
 	LoginAppearance, add-on of rdf2html.xsl
-	
+
 	The Login appearance is used whenever a user has to enter his/her credentials (as part of a form-based authentication).
-	
+
+	CHANGED The LoginAppearance is specific for the dotwebstack theatre, and differs fully from the original LDT implementation
+
 -->
 <xsl:stylesheet version="2.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"

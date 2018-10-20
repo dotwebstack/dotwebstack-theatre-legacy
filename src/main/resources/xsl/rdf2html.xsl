@@ -1,8 +1,8 @@
 <!--
 
-    NAME     rdf2html.xsl
-    VERSION  1.21.1-SNAPSHOT
-    DATE     2018-04-25
+    NAME     DWS rdf2html.xsl
+    VERSION  1.23.0
+    DATE     2018-10-20
 
     Copyright 2012-2018
 
@@ -42,6 +42,8 @@
 	- HiddenAppearance (an appearance for a representation which content is hidden)
 
 	Other appearances should be placed into a separate file. Please include a <xsl:include> entry at the bottom of this file
+
+	CHANGED: Some small changes were made to get this working in the dotwebstack
 -->
 <xsl:stylesheet version="2.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -56,14 +58,14 @@
 
 <xsl:output method="xml" indent="yes"/>
 
-<!-- CHANGED A BIT -->
+<!-- CHANGED: added 'results/' -->
 <xsl:key name="rdf" match="results/rdf:RDF" use="@elmo:query"/>
 <xsl:key name="resource" match="results/rdf:RDF/rdf:Description" use="@rdf:about"/>
 <xsl:key name="nav-bnode" match="results/rdf:RDF[@elmo:appearance='http://bp4mc2.org/elmo/def#NavbarSearchAppearance' or @elmo:appearance='http://bp4mc2.org/elmo/def#NavbarAppearance']/rdf:Description" use="@rdf:nodeID|@rdf:about"/>
 <xsl:key name="nav-data" match="results/rdf:RDF[@elmo:appearance='http://bp4mc2.org/elmo/def#NavbarSearchAppearance' or @elmo:appearance='http://bp4mc2.org/elmo/def#NavbarAppearance']/rdf:Description" use="elmo:data/@rdf:nodeID|elmo:data/@rdf:resource"/>
 
 <xsl:key name="nested" match="results/rdf:RDF/rdf:Description/*[@elmo:appearance='http://bp4mc2.org/elmo/def#NestedAppearance']/rdf:Description" use="@rdf:about"/>
-<!-- END -->
+<!-- END CHANGED -->
 
 <xsl:variable name="serverdomain"><xsl:value-of select="substring-before(replace(/results/context/url,'^((http|https)://)',''),'/')"/></xsl:variable>
 <xsl:variable name="docroot"><xsl:value-of select="/results/context/@docroot"/></xsl:variable>
@@ -98,10 +100,10 @@
 	<xsl:param name="text"/>
 
 	<xsl:choose>
-		<xsl:when test="$text[@xml:lang=$language]!=''"><xsl:value-of select="$text[@xml:lang=$language]"/></xsl:when> <!-- First choice: language of browser -->
-		<xsl:when test="$text[not(exists(@xml:lang))]!=''"><xsl:value-of select="$text[not(exists(@xml:lang))]"/></xsl:when> <!-- Second choice: no language -->
-		<xsl:when test="$text[@xml:lang='nl']!=''"><xsl:value-of select="$text[@xml:lang='nl']"/></xsl:when> <!-- Third choice: dutch -->
-		<xsl:when test="$text[@xml:lang='en']!=''"><xsl:value-of select="$text[@xml:lang='en']"/></xsl:when> <!-- Fourth choice: english -->
+		<xsl:when test="$text[@xml:lang=$language]!=''"><xsl:value-of select="$text[@xml:lang=$language][1]"/></xsl:when> <!-- First choice: language of browser -->
+		<xsl:when test="$text[not(exists(@xml:lang))]!=''"><xsl:value-of select="$text[not(exists(@xml:lang))][1]"/></xsl:when> <!-- Second choice: no language -->
+		<xsl:when test="$text[@xml:lang='nl']!=''"><xsl:value-of select="$text[@xml:lang='nl'][1]"/></xsl:when> <!-- Third choice: dutch -->
+		<xsl:when test="$text[@xml:lang='en']!=''"><xsl:value-of select="$text[@xml:lang='en'][1]"/></xsl:when> <!-- Fourth choice: english -->
 		<xsl:otherwise><xsl:value-of select="$text[1]"/></xsl:otherwise> <!-- If all fails, the first label -->
 	</xsl:choose>
 </xsl:template>
@@ -273,7 +275,14 @@
 				<xsl:apply-templates select="rdf:Description/rdf:rest" mode="object"/>
 			</xsl:if>
 		</xsl:when>
-		<!-- Blank node -->
+		<!-- Blank node, selection -->
+		<xsl:when test="exists(rdf:Description/@rdf:nodeID) and exists(@elmo:select)">
+			<xsl:variable name="select" select="@elmo:select"/>
+			<xsl:for-each select="rdf:Description/*[concat(namespace-uri(),local-name())=$select]">
+				<xsl:apply-templates select="." mode="object"/>
+			</xsl:for-each>
+		</xsl:when>
+		<!-- Blank node, no selection -->
 		<xsl:when test="exists(rdf:Description/@rdf:nodeID)">
 			<table>
 				<xsl:for-each-group select="rdf:Description/*" group-by="name()">
@@ -330,7 +339,9 @@
 				<span><xsl:value-of select="../@elmo:label"/></span>
 				<a href="{@rdf:about}">
 					<xsl:choose>
-						<xsl:when test="exists(rdfs:label)"><xsl:value-of select="rdfs:label"/></xsl:when>
+						<xsl:when test="exists(rdfs:label)">
+							<xsl:call-template name="normalize-language"><xsl:with-param name="text" select="rdfs:label"/></xsl:call-template>
+						</xsl:when>
 						<xsl:otherwise><xsl:value-of select="@rdf:about"/></xsl:otherwise>
 					</xsl:choose>
 				</a>
@@ -339,7 +350,7 @@
 		<div class="panel-body">
 			<table class="table table-striped table-bordered">
 				<tbody>
-				<xsl:for-each-group select="*" group-by="name()"><xsl:sort select="@elmo:index"/>
+				<xsl:for-each-group select="*" group-by="concat(name(),@elmo:index)"><xsl:sort select="concat(@elmo:index,'~')"/><xsl:sort select="local-name()"/>
 					<xsl:if test="not(@elmo:appearance='http://bp4mc2.org/elmo/def#HiddenAppearance')">
 						<tr>
 							<td><xsl:apply-templates select="." mode="predicate"/></td>
@@ -349,8 +360,8 @@
 										<xsl:apply-templates select="." mode="object"/>
 									</xsl:when>
 									<xsl:otherwise>
-												<!-- Nested resources sorteren -->
-										<xsl:for-each select="current-group()"><xsl:sort select="rdf:Description/@rdf:about"/>
+												<!-- Nested resources sorteren, literals op language tag -->
+										<xsl:for-each select="current-group()"><xsl:sort select="rdf:Description/@rdf:about"/><xsl:sort select="@xml:lang"/>
 											<p><xsl:apply-templates select="." mode="object"/></p>
 										</xsl:for-each>
 									</xsl:otherwise>
@@ -520,7 +531,7 @@
 		<xsl:when test="@elmo:appearance='http://bp4mc2.org/elmo/def#ImageAppearance'">
 			<xsl:apply-templates select="." mode="GeoAppearance"><xsl:with-param name="backmap">image</xsl:with-param><xsl:with-param name="appearance">ImageAppearance</xsl:with-param></xsl:apply-templates>
 		</xsl:when>
-		<xsl:when test="@elmo:appearance='http://bp4mc2.org/elmo/def#ChartAppearance'">
+		<xsl:when test="@elmo:appearance='http://bp4mc2.org/elmo/def#ChartAppearance' or @elmo:appearance='http://bp4mc2.org/elmo/def#BarChartAppearance' or @elmo:appearance='http://bp4mc2.org/elmo/def#LineChartAppearance' or @elmo:appearance='http://bp4mc2.org/elmo/def#ScatterPlotChartAppearance'">
 			<xsl:apply-templates select="." mode="ChartAppearance"/>
 		</xsl:when>
 		<xsl:when test="@elmo:appearance='http://bp4mc2.org/elmo/def#CesiumAppearance'">
@@ -535,14 +546,14 @@
 		<xsl:when test="@elmo:appearance='http://bp4mc2.org/elmo/def#ModelAppearance'">
 			<xsl:apply-templates select="." mode="ModelAppearance"/>
 		</xsl:when>
-		<xsl:when test="@elmo:appearance='http://bp4mc2.org/elmo/def#MarkdownAppearance'">		
-			<xsl:apply-templates select="." mode="MarkdownAppearance"/>		
+		<xsl:when test="@elmo:appearance='http://bp4mc2.org/elmo/def#MarkdownAppearance'">
+			<xsl:apply-templates select="." mode="MarkdownAppearance"/>
 		</xsl:when>
-		<xsl:when test="@elmo:appearance='http://bp4mc2.org/elmo/def#TurtleAppearance'">		
-			<xsl:apply-templates select="." mode="TurtleAppearance"/>		
+		<xsl:when test="@elmo:appearance='http://bp4mc2.org/elmo/def#TurtleAppearance'">
+			<xsl:apply-templates select="." mode="TurtleAppearance"/>
 		</xsl:when>
-		<xsl:when test="@elmo:appearance='http://bp4mc2.org/elmo/def#EditorAppearance'">		
-			<xsl:apply-templates select="." mode="EditorAppearance"/>		
+		<xsl:when test="@elmo:appearance='http://bp4mc2.org/elmo/def#EditorAppearance'">
+			<xsl:apply-templates select="." mode="EditorAppearance"/>
 		</xsl:when>
 		<xsl:otherwise>
 			<!-- No, or an unknown appearance, use the data to select a suitable appearance -->
@@ -736,7 +747,7 @@
 		<xsl:if test="../context/subject!=''">&amp;subject=<xsl:value-of select="encode-for-uri(../context/subject)"/></xsl:if>
 		<xsl:text>&amp;format=</xsl:text>
 	</xsl:variable>
-	<!-- Unique number for this datatable -->		
+	<!-- Unique number for this datatable -->
 	<xsl:variable name="table-id" select="@elmo:index"/>
 	<!-- A select query will have @rdf:nodeID elements, with id 'rset' -->
 	<xsl:for-each select="rdf:Description[@rdf:nodeID='rset']">
@@ -797,8 +808,10 @@
 					</xsl:choose>
 				</tbody>
 			</table>
-<!-- CHANGED A BIT: Excel download not available in LDT 2.0 -->
-<!--			<a href="{$original-link}xlsx">Excel</a> -->
+			<!-- CHANGED: removed link to excel (not yet available in the dotwebstack) -->
+			<!--
+			<a href="{$original-link}xlsx">Excel</a>
+			-->
 		</xsl:if>
 	</xsl:for-each>
 	<!-- If it's not a select query, construct the table: a column for a property, and a row for a resource -->
@@ -990,7 +1003,7 @@
 
 <xsl:template match="rdf:RDF" mode="NavbarSearchAppearance">
 	<xsl:param name="search"/>
-	
+
 	<nav class="navbar navbar-default">
 		<xsl:variable name="rootid"><xsl:apply-templates select="rdf:Description[1]" mode="findroot"/></xsl:variable>
 		<xsl:variable name="root" select="key('nav-bnode',$rootid)"/>
