@@ -142,7 +142,7 @@
 	<!-- END CHANGED -->
 	<view>
 		<xsl:apply-templates select="rdf:RDF/(elmo:Fragment|rdf:Description[rdf:type/@rdf:resource!='http://bp4mc2.org/elmo/def#fragment'])/html:stylesheet"/>
-		<xsl:for-each-group select="rdf:RDF/(*|*/elmo:contains/*)[exists(elmo:data[1]) or exists(elmo:query[.!='']) or exists(elmo:service[1]) or exists(elmo:webpage[1]) or exists(elmo:queryForm[1]) or rdf:type/@rdf:resource='http://bp4mc2.org/elmo/def#Production']" group-by="@rdf:about"><xsl:sort select="concat(elmo:index[1],'~')"/>
+		<xsl:for-each-group select="rdf:RDF/(*|*/elmo:contains/*)[exists(elmo:data[1]) or exists(elmo:query[.!='']) or exists(elmo:service[1]) or exists(elmo:webpage[1]) or exists(elmo:queryForm[1]) or rdf:type/@rdf:resource='http://bp4mc2.org/elmo/def#Production']" group-by="@rdf:about"><!-- CHANGED: not sorted -->
 			<xsl:variable name="repuri"><xsl:value-of select="@rdf:about"/></xsl:variable>
 			<xsl:variable name="repindex"><xsl:value-of select="$index/rep[@uri=$repuri]"/></xsl:variable> <!-- CHANGED use $index instead of position() -->
 			<xsl:variable name="with-filter-notok">
