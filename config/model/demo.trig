@@ -736,6 +736,42 @@ config:AmersfoortEndpoint a elmo:Endpoint;
 
 # ==========================
 #
+# ReactEditor
+#
+# ==========================
+
+config:ReactEditorEndpoint a elmo:Endpoint;
+  elmo:pathPattern "/demo/react";
+  elmo:stage config:Stage;
+  elmo:getRepresentation config:ReactEditor;
+.
+
+config:ReactEditor a elmo:Representation;
+  elmo:stage config:Stage;
+  elmo:contains config:Menu;
+  elmo:appearance config:ReactEditorAppearance;
+  elmo:informationProduct config:ReactEditorData;
+.
+#elmo:ReactEditorAppearance rdfs:subClassOf elmo:Appearance;
+config:ReactEditorAppearance a elmo:ReactEditorAppearance;
+.
+
+config:ReactEditorData a elmo:InformationProduct;
+  elmo:backend config:LocalBackend;
+  elmo:query """
+    CONSTRUCT {
+      ?s ?p ?o.
+    }
+    WHERE {
+      GRAPH <http://localhost:8080/demo/editor-config> {
+        ?s ?p ?o
+      }
+    }
+  """
+.
+
+# ==========================
+#
 # Login page
 #
 # ==========================

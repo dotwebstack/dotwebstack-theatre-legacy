@@ -555,6 +555,9 @@
 		<xsl:when test="@elmo:appearance='http://bp4mc2.org/elmo/def#EditorAppearance'">
 			<xsl:apply-templates select="." mode="EditorAppearance"/>
 		</xsl:when>
+		<xsl:when test="@elmo:appearance='http://bp4mc2.org/elmo/def#ReactEditorAppearance'">
+			<xsl:apply-templates select="." mode="ReactEditorAppearance"/>
+		</xsl:when>
 		<xsl:otherwise>
 			<!-- No, or an unknown appearance, use the data to select a suitable appearance -->
 			<xsl:apply-templates select="." mode="ContentAppearance"/>
@@ -1083,5 +1086,6 @@
 <xsl:include href="appearances/VocabularyAppearance.xsl"/>
 <xsl:include href="appearances/TurtleAppearance.xsl"/>
 <xsl:include href="appearances/EditorAppearance.xsl"/>
+<xsl:include href="appearances/ReactEditorAppearance.xsl"/> <!-- CHANGED: Added -->
 
 </xsl:stylesheet>
