@@ -11,7 +11,7 @@
 
 <xsl:template match="rdf:RDF" mode="ReactEditorAppearance">
 	<xsl:for-each select="rdf:Description[exists(elmo:hostName)]">
-		<script>window.begrippenHostname="<xsl:value-of select="elmo:hostName"/>",window.begrippenBeheerEndpoint="<xsl:value-of select="elmo:endpoint"/>",window.begrippenDefConfig="<xsl:value-of select="elmo:definition"/>"</script>
+		<script>window.dwsHostname="<xsl:value-of select="elmo:hostName"/>",window.dwsEndpoint="<xsl:value-of select="elmo:endpoint"/>",window.dwsConfig="<xsl:value-of select="elmo:definition"/>,window.dwsSearchEndpoint="<xsl:value-of select="elmo:searchEndpoint"/>"</script>
 	</xsl:for-each>
 	<div id="root">
 	</div>
