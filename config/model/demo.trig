@@ -759,14 +759,15 @@ config:ReactEditorAppearance a elmo:ReactEditorAppearance;
 config:ReactEditorData a elmo:InformationProduct;
   elmo:backend config:LocalBackend;
   elmo:query """
+    PREFIX elmo: <http://bp4mc2.org/elmo/def#>
     CONSTRUCT {
-      ?s ?p ?o.
+      <http://localhost:8080/editor>
+        elmo:hostName "localhost:8080";
+        elmo:endpoint "/beheer/begrippen";
+        elmo:definition "/def/begrip?format=json"
+      .
     }
-    WHERE {
-      GRAPH <http://localhost:8080/demo/editor-config> {
-        ?s ?p ?o
-      }
-    }
+    WHERE {}
   """
 .
 
