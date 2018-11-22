@@ -849,7 +849,9 @@
 					</tr>
 				</thead>
 				<tbody>
-					<xsl:for-each-group select="rdf:Description" group-by="@rdf:about">
+					<!-- CONSTRUCT queries cannot be sorted, a default sorting is provided to mitigate random result order -->
+					<!-- (random result order is nasty for regression tests) -->
+					<xsl:for-each-group select="rdf:Description" group-by="@rdf:about"><xsl:sort select="@rdf:about"/>
 						<tr>
 							<xsl:variable name="group" select="current-group()"/>
 							<xsl:for-each select="$columns/column">
