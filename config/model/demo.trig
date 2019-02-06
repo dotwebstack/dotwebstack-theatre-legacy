@@ -42,6 +42,10 @@ GRAPH config:Theatre {
     elmo:endpoint "http://localhost:8890/sparql"^^xsd:anyURI
   .
 
+  config:FusekiBackend a elmo:SparqlBackend;
+    elmo:endpoint "http://localhost:3030/dotwebstack/sparql"^^xsd:anyURI
+  .
+
 # ==========================
 #
 # Menu
